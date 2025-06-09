@@ -55,3 +55,16 @@ print(f"Кількість ребер: {G.number_of_edges()}")
 print("\nСписок вузлів:", G.nodes())
 print("\nСписок ребер з вагами:", G.edges(data=True))
 
+print("\n--- Аналіз Найкоротших Шляхів ---")
+
+
+start_node = "City Center"
+end_node = "West Outskirts"
+try:
+    shortest_path = nx.shortest_path(G, source=start_node, target=end_node, weight='weight')
+    shortest_path_length = nx.shortest_path_length(G, source=start_node, target=end_node, weight='weight')
+    print(f"\nНайкоротший шлях з '{start_node}' до '{end_node}':")
+    print(f"  Шлях: {shortest_path}")
+    print(f"  Загальний час у дорозі (вага): {shortest_path_length} хвилин")
+except nx.NetworkXNoPath:
+    print(f"Шлях з '{start_node}' до '{end_node}' не існує.")
