@@ -7,7 +7,7 @@ def dijkstra(graph, start_node, weight_attribute='weight'):
     distances = {node: float('infinity') for node in graph.nodes()}
     distances[start_node] = 0
     previous_nodes = {node: None for node in graph.nodes()}
-    priority_queue = [(0, start_node)]  # (distance, node)
+    priority_queue = [(0, start_node)] 
 
     while priority_queue:
         current_distance, current_node = heapq.heappop(priority_queue)
@@ -38,7 +38,7 @@ def reconstruct_path(previous_nodes, start_node, end_node):
     if path[0] == start_node:
         return path
     else:
-        return [] # No path found
+        return [] 
 
 
 G = nx.Graph()
