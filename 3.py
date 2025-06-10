@@ -1,5 +1,44 @@
 import networkx as nx
 import matplotlib.pyplot as plt
+import heapq
+
+
+def dijkstra(graph, start_node, weight_attribute='weight'):
+    distances = {node: float('infinity') for node in graph.nodes()}
+    distances[start_node] = 0
+    previous_nodes = {node: None for node in graph.nodes()}
+    priority_queue = [(0, start_node)]  # (distance, node)
+
+    while priority_queue:
+        current_distance, current_node = heapq.heappop(priority_queue)
+
+        
+        if current_distance > distances[current_node]:
+            continue
+
+        for neighbor in graph.neighbors(current_node):
+            weight = graph[current_node][neighbor].get(weight_attribute, 1)
+            distance = current_distance + weight
+
+            if distance < distances[neighbor]:
+                distances[neighbor] = distance
+                previous_nodes[neighbor] = current_node
+                heapq.heappush(priority_queue, (distance, neighbor))
+    
+    return distances, previous_nodes
+
+
+def reconstruct_path(previous_nodes, start_node, end_node):
+    path = []
+    current_node = end_node
+    while current_node is not None:
+        path.insert(0, current_node)
+        current_node = previous_nodes[current_node]
+    
+    if path[0] == start_node:
+        return path
+    else:
+        return [] # No path found
 
 
 G = nx.Graph()
@@ -41,7 +80,7 @@ plt.title("Транспортна мережа міста зі зваженим�
 plt.show()
 
 
-print("\n--- Найкоротші шляхи (за часом) між усіма парами вершин ---")
+print("\n--- Найкоротші шляхи (за часом) між усіма парами вершин (ВЛАСНА РЕАЛІЗАЦІЯ АЛГОРИТМУ ДЕЙКСТРИ) ---")
 
 
 all_nodes = list(G.nodes())
@@ -52,24 +91,24 @@ for start_node in all_nodes:
         if start_node == end_node:
             continue 
 
-        path = nx.shortest_path(G, source=start_node, target=end_node, weight='weight')
-            
-        length = nx.shortest_path_length(G, source=start_node, target=end_node, weight='weight')
+        distances, previous_nodes = dijkstra(G, start_node, weight_attribute='weight')
+        
+        path = reconstruct_path(previous_nodes, start_node, end_node)
+        length = distances[end_node]
 
         print(f"\nЗ '{start_node}' до '{end_node}':")
-        print(f"  Шлях: {path}")
-        print(f"  Загальний час: {length} хвилин")
+        print(f"  Шлях: {path}")
+        print(f"  Загальний час: {length} хвилин")
         
         
-print("\n--- Найкоротші шляхи від кожної вершини до всіх інших (як словник) ---")
+print("\n--- Найкоротші шляхи від кожної вершини до всіх інших (як словник) (ВЛАСНА РЕАЛІЗАЦІЯ АЛГОРИТМУ ДЕЙКСТРИ) ---")
 
 for source_node in all_nodes:
-    shortest_paths_from_source = nx.shortest_path(G, source=source_node, weight='weight')
-    shortest_path_lengths_from_source = nx.shortest_path_length(G, source=source_node, weight='weight')
+    distances, previous_nodes = dijkstra(G, source_node, weight_attribute='weight')
 
     print(f"\nНайкоротші шляхи та часи від '{source_node}':")
-    for target_node in shortest_paths_from_source:
+    for target_node in all_nodes:
         if source_node != target_node:
-            path = shortest_paths_from_source[target_node]
-            length = shortest_path_lengths_from_source[target_node]
-            print(f"  До '{target_node}': Шлях {path}, Час {length} хвилин")
+            path = reconstruct_path(previous_nodes, source_node, target_node)
+            length = distances[target_node]
+            print(f"  До '{target_node}': Шлях {path}, Час {length} хвилин")
